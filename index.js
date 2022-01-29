@@ -19,9 +19,26 @@ const client = new MongoClient(uri, {
 
 const run = async () => {
   const database = client.db("cineSnob");
+  const watchListCollection = database.collection("watchList");
   try {
     await client.connect();
-    console.log("DB is connectd");
+    app.post("/watchlist", async (req, res) => {
+      const data = req.body;
+      const result = await watchListCollection.insertOne(data);
+      res.json(result);
+    });
+
+    app.get("/watchlist", async (req, res) => {
+      const data = await watchListCollection.find({}).toArray();
+      res.send(data);
+    });
+
+    app.delete("/watchlist/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await watchListCollection.deleteOne(query);
+      res.json(result);
+    });
   } finally {
     // await client.close();
   }
